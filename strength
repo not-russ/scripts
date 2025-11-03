@@ -76,8 +76,7 @@ local window =
     }
 )
 
-
-local premiumFolder = MiscTab:AddFolder("Premium Systems")
+local premiumFolder = window:AddFolder("Premium Systems")
 
 local function unequipAllPetsPremium()
     local petsFolder = player.petsFolder
