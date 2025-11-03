@@ -79,6 +79,7 @@ local window =
 
 local FarmingTab = window:AddTab("Farming")
 MainTab:Show()
+end
 
 local consumablesFolder = FarmingTab:AddFolder("Consumables")
 
