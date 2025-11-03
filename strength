@@ -1,0 +1,127 @@
+local consumablesFolder = FarmingTab:AddFolder("Consumables")
+
+local function activateProteinEgg()
+    local tool = player.Character:FindFirstChild("Protein Egg") or player.Backpack:FindFirstChild("Protein Egg")
+    if tool then
+        player.muscleEvent:FireServer("proteinEgg", tool)
+    end
+end
+
+local eggRunning = false
+task.spawn(
+    function()
+        while true do
+            if eggRunning then
+                activateProteinEgg()
+                task.wait(1800)
+            else
+                task.wait(1)
+            end
+        end
+    end
+)
+
+consumablesFolder:AddSwitch(
+    "Auto Egg",
+    function(state)
+        eggRunning = state
+        if state then
+            activateProteinEgg()
+        end
+    end
+)
+
+local function activateShake()
+    local tool = player.Character:FindFirstChild("Tropical Shake") or player.Backpack:FindFirstChild("Tropical Shake")
+    if tool then
+        player.muscleEvent:FireServer("tropicalShake", tool)
+    end
+end
+
+local shakeRunning = false
+task.spawn(
+    function()
+        while true do
+            if shakeRunning then
+                activateShake()
+                task.wait(900)
+            else
+                task.wait(1)
+            end
+        end
+    end
+)
+
+consumablesFolder:AddSwitch(
+    "Auto Shake",
+    function(state)
+        shakeRunning = state
+        if state then
+            activateShake()
+        end
+    end
+)
+
+local itemList = {
+    "Tropical Shake",
+    "Energy Shake",
+    "Protein Bar",
+    "TOUGH Bar",
+    "Protein Shake",
+    "ULTRA Shake",
+    "Energy Bar"
+}
+
+local function formatEventName(itemName)
+    local parts = {}
+    for word in itemName:gmatch("%S+") do
+        table.insert(parts, word:lower())
+    end
+    for i = 2, #parts do
+        parts[i] = parts[i]:sub(1, 1):upper() .. parts[i]:sub(2)
+    end
+    return table.concat(parts)
+end
+
+local function activateRandomItems(count)
+    local shuffledItems = {}
+    for _, item in ipairs(itemList) do
+        table.insert(shuffledItems, item)
+    end
+    for i = #shuffledItems, 2, -1 do
+        local j = math.random(i)
+        shuffledItems[i], shuffledItems[j] = shuffledItems[j], shuffledItems[i]
+    end
+    for i = 1, math.min(count, #shuffledItems) do
+        local tool =
+            player.Character:FindFirstChild(shuffledItems[i]) or player.Backpack:FindFirstChild(shuffledItems[i])
+        if tool then
+            local eventName = formatEventName(shuffledItems[i])
+            player.muscleEvent:FireServer(eventName, tool)
+        end
+    end
+end
+
+local eatingRunning = false
+task.spawn(
+    function()
+        while true do
+            if eatingRunning then
+                activateRandomItems(4)
+                task.wait(0.5)
+            else
+                task.wait(0.5)
+            end
+        end
+    end
+)
+
+consumablesFolder:AddSwitch(
+    "Eat Everything",
+    function(state)
+        eatingRunning = state
+        if state then
+            activateRandomItems(4)
+        end
+    end
+)
