@@ -1,0 +1,509 @@
+local Library = loadstring(game:HttpGetAsync("https://github.com/ActualMasterOogway/Fluent-Renewed/releases/latest/download/Fluent.luau"))()
+local SaveManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/SaveManager.luau"))()
+local InterfaceManager = loadstring(game:HttpGetAsync("https://raw.githubusercontent.com/ActualMasterOogway/Fluent-Renewed/master/Addons/InterfaceManager.luau"))()
+ 
+local player = game.Players.LocalPlayer
+local displayName = player.DisplayName
+
+local Window = Library:CreateWindow{
+	Title = "✨ " .. displayName .. "'s Premium Script!",
+	SubTitle = "By Masterboy123!⭐",
+	TabWidth = 125,
+	Size = UDim2.fromOffset(830, 525),
+	Resize = true,
+	MinSize = Vector2.new(470, 380),
+	Acrylic = true,
+	Theme = "VSC Dark High Contrast",
+	MinimizeKey = Enum.KeyCode.RightControl
+}
+
+local Tabs = {
+    Main = Window:CreateTab{
+        Title = "Main ⭐",
+        Icon = "phosphor-house-bold"
+    },
+    
+    AutoBuy = Window:CreateTab{
+        Title = "Main ⭐",
+        Icon = "phosphor-shopping-cart-bold"
+    },
+    
+    AutoStuff = Window:CreateTab{
+        Title = "Auto Stuff 🔄",
+        Icon = "phosphor-robot-bold"
+    },
+    
+    AutoFarm = Window:CreateTab{
+        Title = "Auto Farm 🌾",
+        Icon = "phosphor-robot-bold"
+    },
+    
+    Rebirth = Window:CreateTab{
+        Title = "Rebirth 🔁",
+        Icon = "phosphor-arrows-clockwise-bold"
+    },
+    
+    Killer = Window:CreateTab{
+        Title = "Killer ⚔️",
+        Icon = "phosphor-sword-bold"
+    },
+    
+    Crystals = Window:CreateTab{
+        Title = "Crystals 💎",
+        Icon = "phosphor-diamond-bold"
+    },
+    
+    Teleport = Window:CreateTab{
+        Title = "Teleport 🚀",
+        Icon = "phosphor-dog-bold"
+    },
+    
+    Stats = Window:CreateTab{
+        Title = "Stats 📊",
+        Icon = "phosphor-sparkle-bold"
+    },
+    
+    Misc = Window:CreateTab{
+        Title = "Misc 🎯",
+        Icon = "phosphor-map-pin-bold"
+    },
+    
+    Settings = Window:CreateTab{
+        Title = "Settings ⚙️",
+        Icon = "phosphor-sliders-bold"
+    },
+
+    Credits = Window:CreateTab{
+        Title = "Credits ⭐",
+        Icon = "phosphor-star-bold"
+    }
+}
+
+local Options = Library.Options  
+local MainSection = Tabs.Main:CreateSection("Basic Controls")
+local selectedSize = "2"
+
+local ScriptInfo = Tabs.Credits:CreateParagraph("ScriptInfo", {
+    Title = "✨ Lurnai",
+    Content = [[
+        📌 Version: 2.10
+        
+        Welcome to Lurnai
+    ]],
+    TitleAlignment = "Center",
+    ContentAlignment = Enum.TextXAlignment.Center
+})
+
+local TeamInfo = Tabs.Credits:CreateParagraph("TeamInfo", {
+    Title = "🌟 Our Amazing Team 🌟",
+    Content = [[
+        👑 Owner 👑
+        Name: Masterboy123 ⭐
+        Roblox: pro_gamerxm (Aka MCL_Havoc)
+        Discord: .masterboy123.
+        Role: Owner of Script, Mastermind of Coding
+
+        🌟 CoOwner 🌟
+        Name: MCL_Ducks 🎯
+        Roblox: erzzg111111 (Aka MCL_Ducks)
+        Discord: levrone3998
+        Role: Mastermind of Script
+
+        🌟 CoOwner 🌟
+        Name: 1_6wk 💫
+        Roblox: 1_6wk
+        Discord: 1_6wk
+        Role: Mastermind of Ideas
+    ]],
+    TitleAlignment = "Center",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+-- Initialize Stats Section and Services
+local IntSection = Tabs.Stats:CreateSection("📊 Player Stats")
+local RunService = game:GetService("RunService")
+local player = game.Players.LocalPlayer
+
+-- Timer Variables
+local startTime = 0
+local sessionStartTime = os.time()
+local timerRunning = false
+
+-- Stats Tracking Variables
+local strengthGained = 0
+local lastStrengthValue = nil
+local rebirthsGained = 0
+local lastRebirthsValue = nil
+local killsGained = 0
+local lastKillsValue = nil
+local brawlsGained = 0
+local lastBrawlsValue = nil
+local goodKarmaGained = 0
+local lastGoodKarmaValue = nil
+local evilKarmaGained = 0
+local lastEvilKarmaValue = nil
+local durabilityGained = 0
+local lastDurabilityValue = nil
+local agilityGained = 0
+local lastAgilityValue = nil
+local muscleKingTimeGained = 0
+local lastMuscleKingTimeValue = nil
+
+-- Create UI Elements
+local TimerParagraph = Tabs.Stats:CreateParagraph("SessionTimer", {
+    Title = "⏱️ Session Time",
+    Content = "0d 0h 0m 0s",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local CustomTimerParagraph = Tabs.Stats:CreateParagraph("CustomTimer", {
+    Title = "⏱️ Custom Timer",
+    Content = "Timer not started",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local LeaderParagraph = Tabs.Stats:CreateParagraph("LeaderStats", {
+    Title = "📈 Leaderboard Stats",
+    Content = "Loading stats...",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+local IntParagraph = Tabs.Stats:CreateParagraph("IntStats", {
+    Title = "💪 Player Stats",
+    Content = "Loading stats...",
+    TitleAlignment = "Left",
+    ContentAlignment = Enum.TextXAlignment.Left
+})
+
+-- Timer Control Button
+Tabs.Stats:CreateButton{
+    Title = "⏯️ Start/Stop Timer",
+    Description = "Track your training sessions",
+    Callback = function()
+        if not timerRunning then
+            startTime = os.time()
+            timerRunning = true
+            CustomTimerParagraph:SetContent("Timer running...")
+        else
+            timerRunning = false
+            CustomTimerParagraph:SetContent("Timer stopped")
+        end
+    end
+}
+
+-- Utility Functions
+local function formatNumber(number)
+    local formatted = tostring(math.floor(number))
+    local k
+    while true do
+        formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", '%1,%2')
+        if k == 0 then break end
+    end
+    return formatted
+end
+
+local function formatTime(seconds)
+    local days = math.floor(seconds / 86400)
+    local hours = math.floor((seconds % 86400) / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
+    local secs = seconds % 60
+    return string.format("%dd %dh %dm %ds", days, hours, minutes, secs)
+end
+
+local function debugPrint(message, value)
+    print(string.format("📊 %s: %s", message, tostring(value)))
+end
+
+-- Initialize and Wait for Game Load
+repeat task.wait() until game:IsLoaded()
+debugPrint("Game Loaded", "Success")
+
+if not player.Character then
+    player.CharacterAdded:Wait()
+end
+debugPrint("Character Loaded", "Success")
+
+repeat task.wait() until player:FindFirstChild("leaderstats") and player:FindFirstChild("goodKarma")
+debugPrint("Stats Loaded", "Success")
+
+-- Main Stats Update Loop
+RunService.RenderStepped:Connect(function()
+    local sessionTime = os.time() - sessionStartTime
+    TimerParagraph:SetContent(formatTime(sessionTime))
+    
+    if timerRunning then
+        local elapsed = os.time() - startTime
+        CustomTimerParagraph:SetContent(formatTime(elapsed))
+    end
+
+    local currentStrength = player.leaderstats.Strength.Value
+    local currentRebirths = player.leaderstats.Rebirths.Value
+    local currentKills = player.leaderstats.Kills.Value
+    local currentBrawls = player.leaderstats.Brawls.Value
+    local currentGoodKarma = player.goodKarma.Value
+    local currentEvilKarma = player.evilKarma.Value
+    local currentDurability = player.Durability.Value
+    local currentAgility = player.Agility.Value
+    local currentMuscleKingTime = player.muscleKingTime.Value
+
+    -- Track Strength
+    if lastStrengthValue == nil then
+        lastStrengthValue = currentStrength
+    elseif currentStrength > lastStrengthValue then
+        strengthGained = strengthGained + (currentStrength - lastStrengthValue)
+    end
+    lastStrengthValue = currentStrength
+
+    -- Track Rebirths
+    if lastRebirthsValue == nil then
+        lastRebirthsValue = currentRebirths
+    elseif currentRebirths > lastRebirthsValue then
+        rebirthsGained = rebirthsGained + (currentRebirths - lastRebirthsValue)
+    end
+    lastRebirthsValue = currentRebirths
+
+    -- Track Kills
+    if lastKillsValue == nil then
+        lastKillsValue = currentKills
+    elseif currentKills > lastKillsValue then
+        killsGained = killsGained + (currentKills - lastKillsValue)
+    end
+    lastKillsValue = currentKills
+
+    -- Track Brawls
+    if lastBrawlsValue == nil then
+        lastBrawlsValue = currentBrawls
+    elseif currentBrawls > lastBrawlsValue then
+        brawlsGained = brawlsGained + (currentBrawls - lastBrawlsValue)
+    end
+    lastBrawlsValue = currentBrawls
+
+    -- Track Good Karma
+    if lastGoodKarmaValue == nil then
+        lastGoodKarmaValue = currentGoodKarma
+    elseif currentGoodKarma > lastGoodKarmaValue then
+        goodKarmaGained = goodKarmaGained + (currentGoodKarma - lastGoodKarmaValue)
+    end
+    lastGoodKarmaValue = currentGoodKarma
+
+    -- Track Evil Karma
+    if lastEvilKarmaValue == nil then
+        lastEvilKarmaValue = currentEvilKarma
+    elseif currentEvilKarma > lastEvilKarmaValue then
+        evilKarmaGained = evilKarmaGained + (currentEvilKarma - lastEvilKarmaValue)
+    end
+    lastEvilKarmaValue = currentEvilKarma
+
+    -- Track Durability
+    if lastDurabilityValue == nil then
+        lastDurabilityValue = currentDurability
+    elseif currentDurability > lastDurabilityValue then
+        durabilityGained = durabilityGained + (currentDurability - lastDurabilityValue)
+    end
+    lastDurabilityValue = currentDurability
+
+    -- Track Agility
+    if lastAgilityValue == nil then
+        lastAgilityValue = currentAgility
+    elseif currentAgility > lastAgilityValue then
+        agilityGained = agilityGained + (currentAgility - lastAgilityValue)
+    end
+    lastAgilityValue = currentAgility
+
+    -- Track Muscle King Time
+    if lastMuscleKingTimeValue ==  then
+        lastMuscleKingTimeValue = currentMuscleKingTime
+    elseif currentMuscleKingTime > lastMuscleKingTimeValue then
+        muscleKingTimeGained = muscleKingTimeGained + (currentMuscleKingTime - lastMuscleKingTimeValue)
+    end
+    lastMuscleKingTimeValue = currentMuscleKingTime
+
+    -- Update Display
+    LeaderParagraph:SetContent(string.format(
+        "Strength: %s     Strength Gained: %s\n" ..
+        "Rebirths: %s     Rebirths Gained: %s\n" ..
+        "Kills: %s     Kills Gained: %s\n" ..
+        "Brawls: %s     Brawls Gained: %s",
+        formatNumber(currentStrength), formatNumber(strengthGained),
+        formatNumber(currentRebirths), formatNumber(rebirthsGained),
+        formatNumber(currentKills), formatNumber(killsGained),
+        formatNumber(currentBrawls), formatNumber(brawlsGained)
+    ))
+
+    IntParagraph:SetContent(string.format(
+        "Good Karma: %s     Gained: %s\n" ..
+        "Evil Karma: %s     Gained: %s\n" ..
+        "Durability: %s     Gained: %s\n" ..
+        "Agility: %s     Gained: %s\n" ..
+        "Muscle King Time: %s     Gained: %s",
+        formatNumber(currentGoodKarma), formatNumber(goodKarmaGained),
+        formatNumber(currentEvilKarma), formatNumber(evilKarmaGained),
+        formatNumber(currentDurability), formatNumber(durabilityGained),
+        formatNumber(currentAgility), formatNumber(agilityGained),
+        formatNumber(currentMuscleKingTime), formatNumber(muscleKingTimeGained)
+    ))
+end)
+
+-- Stats Categories
+local leaderStats = {"Strength", "Rebirths", "Kills", "Brawls"}
+local intStats = {"Agility", "Durability", "Gems", "evilKarma", "goodKarma", "muscleKingTime"}
+
+
+local MainToggle = Tabs.Rebirth:CreateToggle("UltimateFarm", {
+    Title = "Fast Rebirths",
+    Default = false,
+    Callback = function(Value)
+        isRunning = Value
+        getgenv().lift = Value
+
+        -- Set size to smallest for faster interactions
+        game:GetService("ReplicatedStorage").rEvents.changeSpeedSizeRemote:InvokeServer("changeSize", 1)
+
+        -- Stop the script if toggled off
+        if not Value then
+            unequipAllPets()
+            return
+        end
+
+        task.spawn(function()
+            while isRunning do
+                local player = game.Players.LocalPlayer
+                local character = player.Character
+
+                -- Check for Protein Egg boost and use it at the right time
+                local boostFolder = player:FindFirstChild("boostTimersFolder")
+                local eggTimer = boostFolder and boostFolder:FindFirstChild("Protein Egg")
+                if eggTimer and tonumber(eggTimer.Value) == 25 then
+                    useOneEgg()
+                end
+
+                -- Locate and interact with the lifting machine
+                local machine = findMachine("Jungle Bar Lift")
+                if machine and machine:FindFirstChild("interactSeat") and character and character:FindFirstChild("HumanoidRootPart") then
+                    character.HumanoidRootPart.CFrame = machine.interactSeat.CFrame * CFrame.new(0, 3, 0)
+                    task.wait(0.1) -- Faster interaction
+                    pressE()
+                end
+
+                -- Calculate rebirth cost dynamically
+                local rebirths = player.leaderstats.Rebirths.Value
+                local rebirthCost = 10000 + (5000 * rebirths)
+                local goldenRebirths = player.ultimatesFolder:FindFirstChild("Golden Rebirth")
+                if goldenRebirths then
+                    rebirthCost = math.floor(rebirthCost * (1 - (goldenRebirths.Value * 0.1)))
+                end
+
+                -- Spam lift to gain strength efficiently (Optimized Speed Grind)
+                for _ = 1, 10 do
+                    game:GetService("Players").LocalPlayer.muscleEvent:FireServer("rep")
+                end
+
+                -- Rebirth when the required strength is met
+                if player.leaderstats.Strength.Value >= rebirthCost then
+                    local currentRebirths = player.leaderstats.Rebirths.Value
+
+                    if currentRebirths >= targetRebirth then
+                        isRunning = false
+                        Library:Notify{
+                            Title = "Target Reached",
+                            Content = "Reached target rebirth count! 🎯",
+                            Duration = 5
+                        }
+                        return
+                    end
+
+                    -- Equip specific pets for rebirth optimization
+                    unequipAllPets()
+                    task.wait(0.01)
+                    equipUniquePet("Tribal Overlord")
+                    task.wait(0.05)
+                    game:GetService("ReplicatedStorage").rEvents.rebirthRemote:InvokeServer("rebirthRequest")
+                    unequipAllPets()
+                    task.wait(0.01)
+                    equipUniquePet("Swift Samurai")
+                end
+
+                -- Break the loop if the toggle is off
+                if not isRunning then break end
+                task.wait(0.01) -- Optimized loop delay for faster rebirths
+            end
+        end)
+    end
+})
+
+local Toggle = Tabs.Rebirth:CreateToggle("FrameToggle", {
+    Title = "🎮 Hide All Frames",
+    Description = "Toggle ON to hide all game frames",
+    Default = true,
+    Callback = function(Value)
+        local rSto = game:GetService("ReplicatedStorage")
+        for _, obj in pairs(rSto:GetChildren()) do
+            if obj:IsA("Frame") then
+                obj.Visible = not Value
+            end
+        end
+    end
+})
+
+
+local GrindToggle = Tabs.Rebirth:CreateToggle("SpeedGrind", {
+	Title = "💪Speed Grind (No Rebirth)",
+	Default = false,
+	Callback = function(Value)
+		local isGrinding = Value
+		if not Value then
+			unequipAllPets()
+			return
+		end
+		equipUniquePet("Swift Samurai")
+		for i = 1, 12 do
+			task.spawn(function()
+				while isGrinding do
+					game:GetService("Players").LocalPlayer.muscleEvent:FireServer("rep")
+					task.wait()
+				end
+			end)
+		end
+	end
+})
+
+
+local player = game.Players.LocalPlayer
+local gui = Instance.new("ScreenGui")
+gui.Parent = player:WaitForChild("PlayerGui")
+
+-- Create the toggle button
+local button = Instance.new("ImageButton")
+button.Size = UDim2.new(0, 50, 0, 50) -- Adjust size
+button.Position = UDim2.new(0, 10, 0, 10) -- Adjust position
+button.Image = "rbxassetid://6031097225" -- Example eye icon (change as needed)
+button.Parent = gui
+
+-- Create the script frame
+local frame = Instance.new("Frame")
+frame.Size = UDim2.new(0, 400, 0, 300) -- Adjust size
+frame.Position = UDim2.new(0.5, -200, 0.5, -150) -- Centered
+frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30) -- Dark background
+frame.Visible = false -- Initially hidden
+frame.Parent = gui
+
+-- Add a label inside the frame to simulate a script display
+local label = Instance.new("TextLabel")
+label.Size = UDim2.new(1, -10, 1, -10)
+label.Position = UDim2.new(0, 5, 0, 5)
+label.Text = "-- This is a sample script display\nprint('Hello, World!')"
+label.TextColor3 = Color3.new(1, 1, 1)
+label.BackgroundTransparency = 1
+label.TextXAlignment = Enum.TextXAlignment.Left
+label.TextYAlignment = Enum.TextYAlignment.Top
+label.Font = Enum.Font.Code
+label.TextSize = 18
+label.Parent = frame
+
+-- Toggle visibility when button is clicked
+button.MouseButton1Click:Connect(function()
+    frame.Visible = not frame.Visible
+end)
