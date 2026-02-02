@@ -1,32 +1,3 @@
-
--- ==== REBUILT & FIXED SCRIPT HEADER ====
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local player = Players.LocalPlayer
-
-repeat task.wait() until player:FindFirstChild("leaderstats")
-repeat task.wait() until player:FindFirstChild("boostTimersFolder")
-
-local leaderstats = player.leaderstats
-local boosts = player.boostTimersFolder
-
--- Number formatter with commas (no rounding)
-local function formatNumber(num)
-    local str = tostring(num)
-    local sign, int = str:match("^([%-]?)(%d+)")
-    int = int:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
-    return sign .. int
-end
-
--- Safe Protein Egg use
-local function useOneEgg()
-    local tool = player.Character:FindFirstChild("Protein Egg") or player.Backpack:FindFirstChild("Protein Egg")
-    if tool then
-        player.muscleEvent:FireServer("proteinEgg", tool)
-    end
-end
-
 local library =
     loadstring(game:HttpGet("https://raw.githubusercontent.com/memejames/elerium-v2-ui-library//main/Library", true))()
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
@@ -120,7 +91,14 @@ local targetPlayer = nil
 local selectedPet = "Darkstar Hunter"
 local selectedAura = "Entropic Blast"
 
-local function formatNumber(n)
+
+local function formatNumber(num)
+    local str = tostring(num)
+    local sign, int = str:match("^([%-]?)(%d+)")
+    int = int:reverse():gsub("(%d%d%d)", "%1,"):reverse():gsub("^,", "")
+    return sign .. int
+end
+
     if n >= 1e15 then
         return string.format("%.1fqa", n / 1e15)
     elseif n >= 1e12 then
@@ -132,12 +110,12 @@ local function formatNumber(n)
     elseif n >= 1e3 then
         return string.format("%.1fk", n / 1e3)
     else
-        return tostring((n))
+        return tostring(math.floor(n))
     end
 end
 
 local function formatWithCommas(n)
-    local formatted = tostring((n))
+    local formatted = tostring(math.floor(n))
     local k
     while true do
         formatted, k = string.gsub(formatted, "^(-?%d+)(%d%d%d)", "%1,%2")
@@ -1296,7 +1274,7 @@ local function updateRepsPerTick()
     if repsPerTick < 1 then
         repsPerTick = 1
     else
-        repsPerTick = (repsPerTick)
+        repsPerTick = math.floor(repsPerTick)
     end
 end
 
@@ -1347,7 +1325,7 @@ fastFarmFolder:AddTextBox(
     function(value)
         local num = tonumber(value)
         if num and num > 0 then
-            threadCount = (num)
+            threadCount = math.floor(num)
             updateRepsPerTick()
         end
     end
@@ -1724,7 +1702,7 @@ task.spawn(
         while true do
             if eggRunning then
                 activateProteinEgg()
-                task.wait(1800)
+                task.wait(1820)
             else
                 task.wait(1)
             end
@@ -2034,26 +2012,18 @@ petManagementFolder:AddButton(
 
 local inventoryFolder = PetsTab:AddFolder("Inventory Management")
 
-local proteinEggLabel = inventoryFolder:AddLabel("Protein Eggs: 0")
-local tropicalShakeLabel = inventoryFolder:AddLabel("Tropical Shakes: 0")
-
 local function updateItemCount()
     local proteinEggCount = 0
-    local tropicalShakeCount = 0
 
-    local consumablesFolder = player:FindFirstChild("consumablesFolder")
-    if consumablesFolder then
-        for _, item in ipairs(consumablesFolder:GetChildren()) do
-            if item.Name == "Protein Egg" then
-                proteinEggCount = proteinEggCount + item.Value
-            elseif item.Name == "Tropical Shake" then
-                tropicalShakeCount = tropicalShakeCount + item.Value
-            end
+    local boosts = player:FindFirstChild("boostTimersFolder")
+    if boosts then
+        local egg = boosts:FindFirstChild("Protein Egg")
+        if egg then
+            proteinEggCount = egg.Value
         end
     end
 
-    proteinEggLabel.Text = "Protein Eggs: " .. proteinEggCount
-    tropicalShakeLabel.Text = "Tropical Shakes: " .. tropicalShakeCount
+    proteinEggLabel.Text = "Protein Eggs: " .. formatNumber(proteinEggCount)
 end
 
 task.spawn(
@@ -2635,7 +2605,7 @@ premiumFolder:AddSwitch(
 
                     if player.ultimatesFolder:FindFirstChild("Golden Rebirth") then
                         local goldenRebirths = player.ultimatesFolder["Golden Rebirth"].Value
-                        rebirthCost = (rebirthCost * (1 - (goldenRebirths * 0.1)))
+                        rebirthCost = math.floor(rebirthCost * (1 - (goldenRebirths * 0.1)))
                     end
 
                     unequipAllPetsPremium()
@@ -2750,9 +2720,9 @@ local projectedDurabilityLabel = StatsTab:AddLabel("Durability Pace: 0 /Hour | 0
 local fastRepTimeLabel = StatsTab:AddLabel("Fast Rep Time: 0d 0h 0m 0s")
 
 local function formatTime(seconds)
-    local days = (seconds / 86400)
-    local hours = ((seconds % 86400) / 3600)
-    local minutes = ((seconds % 3600) / 60)
+    local days = math.floor(seconds / 86400)
+    local hours = math.floor((seconds % 86400) / 3600)
+    local minutes = math.floor((seconds % 3600) / 60)
     local secs = seconds % 60
 
     if days > 0 then
@@ -2836,10 +2806,10 @@ task.spawn(
 
             if trackingStarted then
                 local elapsedTime = currentTime - fastRepStartTime
-                local days = (elapsedTime / (24 * 3600))
-                local hours = ((elapsedTime % (24 * 3600)) / 3600)
-                local minutes = ((elapsedTime % 3600) / 60)
-                local seconds = (elapsedTime % 60)
+                local days = math.floor(elapsedTime / (24 * 3600))
+                local hours = math.floor((elapsedTime % (24 * 3600)) / 3600)
+                local minutes = math.floor((elapsedTime % 3600) / 60)
+                local seconds = math.floor(elapsedTime % 60)
 
                 fastRepTimeLabel.Text = string.format("Fast Rep Time: %dd %dh %dm %ds", days, hours, minutes, seconds)
 
@@ -2859,8 +2829,8 @@ task.spawn(
                     if #strengthHistory >= 2 then
                         local strengthDelta = strengthHistory[#strengthHistory].value - strengthHistory[1].value
                         local strengthPerSecond = strengthDelta / calculationInterval
-                        local strengthPerHour = (strengthPerSecond * 3600)
-                        local strengthPerDay = (strengthPerSecond * 86400)
+                        local strengthPerHour = math.floor(strengthPerSecond * 3600)
+                        local strengthPerDay = math.floor(strengthPerSecond * 86400)
 
                         projectedStrengthLabel.Text =
                             "Strength Pace: " ..
@@ -2870,8 +2840,8 @@ task.spawn(
                     if #durabilityHistory >= 2 then
                         local durabilityDelta = durabilityHistory[#durabilityHistory].value - durabilityHistory[1].value
                         local durabilityPerSecond = durabilityDelta / calculationInterval
-                        local durabilityPerHour = (durabilityPerSecond * 3600)
-                        local durabilityPerDay = (durabilityPerSecond * 86400)
+                        local durabilityPerHour = math.floor(durabilityPerSecond * 3600)
+                        local durabilityPerDay = math.floor(durabilityPerSecond * 86400)
 
                         projectedDurabilityLabel.Text =
                             "Durability Pace: " ..
