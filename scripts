@@ -20,9 +20,11 @@ local function formatNumber(num)
 end
 
 -- Safe Protein Egg use
-local useEggRemote = ReplicatedStorage:WaitForChild("rEvents"):WaitForChild("useBoostRemote")
 local function useOneEgg()
-    useEggRemote:InvokeServer("Protein Egg")
+    local tool = player.Character:FindFirstChild("Protein Egg") or player.Backpack:FindFirstChild("Protein Egg")
+    if tool then
+        player.muscleEvent:FireServer("proteinEgg", tool)
+    end
 end
 
 local library =
