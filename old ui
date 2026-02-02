@@ -452,22 +452,27 @@ local Toggle = Tabs.Rebirth:CreateToggle("FrameToggle", {
 local GrindToggle = Tabs.Rebirth:CreateToggle("SpeedGrind", {
 	Title = "💪Speed Grind (No Rebirth)",
 	Default = false,
-	Callback = function(Value)
-		local isGrinding = Value
-		if not Value then
-			unequipAllPets()
-			return
-		end
-		equipUniquePet("Swift Samurai")
-		for i = 1, 12 do
-			task.spawn(function()
-				while isGrinding do
-					game:GetService("Players").LocalPlayer.muscleEvent:FireServer("rep")
-					task.wait()
-				end
-			end)
-		end
-	end
+	function(bool)
+        local isGrinding = bool
+
+        if not bool then
+            unequipAllPetsPremium()
+            return
+        end
+
+        equipUniquePetPremium("Swift Samurai")
+
+        for i = 1, 14 do
+            task.spawn(
+                function()
+                    while isGrinding do
+                        player.muscleEvent:FireServer("rep")
+                        task.wait()
+                    end
+                end
+            )
+        end
+    end
 })
 
 
