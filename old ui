@@ -314,7 +314,7 @@ RunService.RenderStepped:Connect(function()
     lastAgilityValue = currentAgility
 
     -- Track Muscle King Time
-    if lastMuscleKingTimeValue ==  then
+    if lastMuscleKingTimeValue == nil then
         lastMuscleKingTimeValue = currentMuscleKingTime
     elseif currentMuscleKingTime > lastMuscleKingTimeValue then
         muscleKingTimeGained = muscleKingTimeGained + (currentMuscleKingTime - lastMuscleKingTimeValue)
@@ -450,9 +450,9 @@ local Toggle = Tabs.Rebirth:CreateToggle("FrameToggle", {
 
 
 local GrindToggle = Tabs.Rebirth:CreateToggle("SpeedGrind", {
-	Title = "💪Speed Grind (No Rebirth)",
-	Default = false,
-	function(bool)
+    Title = "💪Speed Grind (No Rebirth)",
+    Default = false,
+    Callback = function(bool)
         local isGrinding = bool
 
         if not bool then
@@ -463,14 +463,12 @@ local GrindToggle = Tabs.Rebirth:CreateToggle("SpeedGrind", {
         equipUniquePetPremium("Swift Samurai")
 
         for i = 1, 14 do
-            task.spawn(
-                function()
-                    while isGrinding do
-                        player.muscleEvent:FireServer("rep")
-                        task.wait()
-                    end
+            task.spawn(function()
+                while isGrinding do
+                    player.muscleEvent:FireServer("rep")
+                    task.wait()
                 end
-            )
+            end)
         end
     end
 })
